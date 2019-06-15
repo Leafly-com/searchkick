@@ -79,13 +79,7 @@ module Searchkick
         new_index.update_settings(index: {refresh_interval: refresh_interval})
       end
 
-      old_indices =
-        begin
-          client.indices.get_alias(name: name).keys
-        rescue Elasticsearch::Transport::Transport::Errors::NotFound
-          {}
-        end
-      actions = old_indices.map { |old_name| {remove: {index: old_name, alias: name}} } + [{add: {index: new_name, alias: name}}]
+      actions = [{remove: {index: "*", alias: name}}, {add: {index: new_name, alias: name}}]
       client.indices.update_aliases body: {actions: actions}
     end
     alias_method :swap, :promote
